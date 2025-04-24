@@ -1,25 +1,23 @@
 import streamlit as st
-import qa_bot
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.docstore.document import Document
 
 st.title("🧠 Chat With Your Text File")
 
-if "vector_created" not in st.session_state:
-    st.session_state.vector_created = False
+uploaded_file = st.file_uploader("Upload a .txt file", type="txt")
+query = st.text_input("Ask a question about the file:")
 
-uploaded_file = st.file_uploader("Upload a .txt or .pdf file", type=["txt", "pdf"])
+if uploaded_file and query:
+    # Read the text file
+    text = uploaded_file.read().decode("utf-8")
+    doc = Document(page_content=text)
 
+    # Set up OpenAI LLM (you must have an OPENAI_API_KEY secret set in Streamlit Cloud!)
+    llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo-instruct")
+    chain = load_qa_chain(llm, chain_type="stuff")
 
-if uploaded_file and not st.session_state.vector_created:
-    with open("temp.txt", "wb") as f:
-        f.write(uploaded_file.read())
-    chunks = qa_bot.load_and_split_docs("temp.txt")
-    qa_bot.create_vector_db(chunks)
-    st.session_state.vector_created = True
-    st.success("Text processed! Ask anything.")
+    # Run the QA chain
+    answer = chain.run(input_documents=[doc], question=query)
+    st.write("**Answer:**", answer)
 
-query = st.text_input("Ask a question:")
-
-if query and st.session_state.vector_created:
-    chain = qa_bot.get_qa_chain()
-    answer = chain.run(query)
-    st.write("Answer:", answer)
