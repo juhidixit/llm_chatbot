@@ -4,5 +4,9 @@ faiss-cpu
 python-dotenv
 streamlit
 tiktoken
+<<<<<<< HEAD
 
+=======
+pypdf
+>>>>>>> c05689d7382117bb2a028f6571ce39f13ac2623c
 
