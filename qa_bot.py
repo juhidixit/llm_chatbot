@@ -1,6 +1,6 @@
 import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.llms import OpenAI
 from langchain.chains import RetrievalQA
@@ -23,12 +23,12 @@ def load_and_split_docs(filename):
 
 def create_vector_db(chunks):
     embeddings = OpenAIEmbeddings()
-    vector_db = FAISS.from_texts(chunks, embedding=embeddings)
-    vector_db.save_local("vector_db")
+    vector_db = Chroma.from_texts(chunks, embedding=embeddings, persist_directory="vector_db")
+    vector_db.persist()
 
 def get_qa_chain():
     embeddings = OpenAIEmbeddings()
-    vector_db = FAISS.load_local("vector_db", embeddings)
+    vector_db = Chroma(persist_directory="vector_db", embedding_function=embeddings)
     retriever = vector_db.as_retriever()
     llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo-instruct")
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
