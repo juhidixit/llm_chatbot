@@ -6,7 +6,8 @@ st.title("🧠 Chat With Your Text File")
 if "vector_created" not in st.session_state:
     st.session_state.vector_created = False
 
-uploaded_file = st.file_uploader("Upload a .txt file", type="txt")
+uploaded_file = st.file_uploader("Upload a .txt or .pdf file", type=["txt", "pdf"])
+
 
 if uploaded_file and not st.session_state.vector_created:
     with open("temp.txt", "wb") as f:
