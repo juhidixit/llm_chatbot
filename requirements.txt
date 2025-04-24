@@ -1,12 +1,7 @@
-openai
-langchain
-faiss-cpu
-python-dotenv
-streamlit
-tiktoken
-<<<<<<< HEAD
-
-=======
-pypdf
->>>>>>> c05689d7382117bb2a028f6571ce39f13ac2623c
-
+openai==1.3.7
+langchain==0.0.340
+faiss-cpu==1.7.4
+python-dotenv==1.0.0
+streamlit==1.32.0
+tiktoken==0.5.1
+pypdf==3.17.4
