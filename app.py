@@ -13,11 +13,12 @@ if uploaded_file and query:
     text = uploaded_file.read().decode("utf-8")
     doc = Document(page_content=text)
 
-    # Set up OpenAI LLM (you must have an OPENAI_API_KEY secret set in Streamlit Cloud!)
+    # Set up OpenAI LLM (requires your OpenAI API key in Streamlit Cloud secrets!)
     llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo-instruct")
     chain = load_qa_chain(llm, chain_type="stuff")
 
     # Run the QA chain
     answer = chain.run(input_documents=[doc], question=query)
     st.write("**Answer:**", answer)
+
 
