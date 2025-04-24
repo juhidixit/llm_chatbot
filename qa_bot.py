@@ -1,28 +1,26 @@
-# qa_bot.py
+import os
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.llms import OpenAI
+from langchain.chains import RetrievalQA
 
 def load_and_split_docs(filename):
-    """Load text file and split into lines as simple 'chunks'."""
     with open(filename, 'r') as f:
         text = f.read()
-    # For demo: just return each sentence as a "chunk"
-    return text.split('\n')
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    chunks = text_splitter.split_text(text)
+    return chunks
 
 def create_vector_db(chunks):
-    """Just store the chunks for now (not a real vector DB)."""
-    # We'll just keep it as a list for demo
-    global TEXT_CHUNKS
-    TEXT_CHUNKS = chunks
+    embeddings = OpenAIEmbeddings()
+    vector_db = FAISS.from_texts(chunks, embedding=embeddings)
+    vector_db.save_local("vector_db")
 
 def get_qa_chain():
-    """Return a simple function to answer from our stored text."""
-    def run(query):
-        # Look for any lines that match keywords in the question
-        results = []
-        for chunk in TEXT_CHUNKS:
-            if any(word.lower() in chunk.lower() for word in query.split()):
-                results.append(chunk)
-        if results:
-            return '\n'.join(results)
-        else:
-            return "Sorry, I couldn't find an answer in your text file."
-    return type("DummyChain", (), {"run": staticmethod(run)})()
+    embeddings = OpenAIEmbeddings()
+    vector_db = FAISS.load_local("vector_db", embeddings)
+    retriever = vector_db.as_retriever()
+    llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo-instruct")
+    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+    return qa_chain
